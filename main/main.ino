@@ -11,8 +11,8 @@ const int SPEED_STEP = 25;   // step for +/-
 String currentCmd = "";      // latest command from BLE
 
 //timeout
-unsigned long lastCommandTime = 0;
-const unsigned long COMMAND_TIMEOUT = 200; //ms
+//unsigned long lastCommandTime = 0;
+//const unsigned long COMMAND_TIMEOUT = 200; //ms
 
 // heart
 uint8_t heart[8][12] = {
@@ -62,19 +62,19 @@ void loop() {
     else {
       // movement commands
       currentCmd = cmd;
-      lastCommandTime = millis(); //timestamp
+      //lastCommandTime = millis(); //timestamp
     }
   }
 
   //if last command is too old, stop motors
-  if(millis() - lastCommandTime > COMMAND_TIMEOUT){
-    stopMotors();
-    currentCmd = "";
-  } else {
+  //if(millis() - lastCommandTime > COMMAND_TIMEOUT){
+  //  stopMotors();
+  //  currentCmd = "";
+  //} else {
     // execute movement based on currentCmd
     if (currentCmd == "F") moveForward(speedValue);
     else if (currentCmd == "B") moveBackward(speedValue);
     else if (currentCmd == "L") turnLeft(speedValue);
     else if (currentCmd == "R") turnRight(speedValue);
-  }
+  //}
 }
