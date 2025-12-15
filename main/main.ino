@@ -1,10 +1,33 @@
 #include <Arduino.h>
 #include "motor_control.h"
 #include "ble_control.h"
+#include "Arduino_LED_Matrix.h"
 
-int speedValue = 150;
+int speedValue = 150;        // initial speed
+const int SPEED_STEP = 25;   // step for +/-
+
+String currentCmd = "";      // latest command from BLE
+
+//timeout
+unsigned long lastCommandTime = 0;
+const unsigned long COMMAND_TIMEOUT = 200; //ms
+
+// heart
+uint8_t heart[8][12] = {
+  {0,0,0,1,0,0,0,0,1,0,0,0},
+  {0,0,1,1,1,0,0,1,1,1,0,0},
+  {0,1,1,1,1,1,1,1,1,1,1,0},
+  {0,1,1,1,1,1,1,1,1,1,1,0},
+  {0,0,1,1,1,1,1,1,1,1,0,0},
+  {0,0,0,1,1,1,1,1,1,0,0,0},
+  {0,0,0,0,1,1,1,1,0,0,0,0},
+  {0,0,0,0,0,1,1,0,0,0,0,0}
+};
 
 void setup() {
+  matrix.begin();
+  matrix.renderBitmap(heart, 12, 8);
+
   Serial.begin(9600);
   setupMotors();
   setupBLE();
@@ -12,39 +35,44 @@ void setup() {
   Serial.println("System ready.");
 }
 
-void loop(){
-  BLE.poll();
-  delay(1);
+void loop() {
+  BLE.poll();   // keep BLE alive
+  delay(1);     // prevent BLE starvation
 
+  // update current command if a new one arrives
   String cmd = checkBLE();
-
-  if (cmd != "") { //only act on new commands
+  if (cmd != "") {
     cmd.trim();
 
-    if (cmd == "F") {
-      Serial.println("Moving Forward");
-      moveForward(speedValue);
-    }
-    else if (cmd == "B") {
-      Serial.println("Moving Backward");
-      moveBackward(speedValue);
-    }
-    else if (cmd == "L"){
-      Serial.println("Turning left");
-      turnLeft(speedValue);
-    }
-    else if (cmd == "R") {
-      Serial.println("Turning right");
-      turnRight(speedValue);
-    }
-    else if (cmd == "S") {
-      Serial.println("Stop");
-      stopMotors();
+    // speed adjustment commands
+    if (cmd == "+") {
+      speedValue += SPEED_STEP;
+      if (speedValue > 255) speedValue = 255;
+      Serial.print("Speed increased to: ");
+      Serial.println(speedValue);
+    } 
+    else if (cmd == "-") {
+      speedValue -= SPEED_STEP;
+      if (speedValue < 0) speedValue = 0;
+      Serial.print("Speed decreased to: ");
+      Serial.println(speedValue);
     }
     else {
-      Serial.println("Unknown command: ");
-      Serial.println(cmd);
+      // movement commands
+      currentCmd = cmd;
+      lastCommandTime = millis(); //timestamp
     }
   }
-  //delay(5); //ble stability??
+
+  //if last command is too old, stop motors
+  if(millis() - lastCommandTime > COMMAND_TIMEOUT){
+    stopMotors();
+    currentCmd = "";
+  } else {
+    // execute movement based on currentCmd
+    if (currentCmd == "F") moveForward(speedValue);
+    else if (currentCmd == "B") moveBackward(speedValue);
+    else if (currentCmd == "L") turnLeft(speedValue);
+    else if (currentCmd == "R") turnRight(speedValue);
+  }
 }
