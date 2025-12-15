@@ -3,6 +3,8 @@
 #include "ble_control.h"
 #include "Arduino_LED_Matrix.h"
 
+ArduinoLEDMatrix matrix;
+
 int speedValue = 150;        // initial speed
 const int SPEED_STEP = 25;   // step for +/-
 
