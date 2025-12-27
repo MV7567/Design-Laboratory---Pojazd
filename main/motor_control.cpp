@@ -34,22 +34,22 @@ void moveBackward(int speed) {
 }
 
 void turnLeft(int speed){
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH); //stop left motor
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
 
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW); //run rigth motor forward
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
 
   analogWrite(ENA, speed);
   analogWrite(ENB, speed);
 }
 
 void turnRight(int speed){
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW); //stop right motor
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
 
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH); //run left motor forward
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
 
   analogWrite(ENA, speed);
   analogWrite(ENB, speed);
