@@ -59,7 +59,7 @@ void loop() {
     } 
     else if (c == '-') {
       speedValue = max(speedValue - SPEED_STEP, 0);
-      ledShowPlus();
+      ledShowMinus();
     } 
     //---------- MOVEMENT ----------
     else {
