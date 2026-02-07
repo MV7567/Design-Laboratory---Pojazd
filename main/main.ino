@@ -3,6 +3,7 @@
 #include "ble_control.h"
 #include "Arduino_LED_Matrix.h"
 #include "LEDmatrix_control.h"
+#include "sensor_control.h"
 
 //ArduinoLEDMatrix matrix;
 
@@ -25,6 +26,7 @@ void setup() {
   setupLEDMatrix();
   setupMotors();
   setupBLE();
+  setupSensor();
 
 }
 
@@ -32,6 +34,17 @@ void setup() {
 void loop() {
   BLE.poll(); //keep BLE alive
   delay(1); //prevent BLE starvation
+
+  long distance = getDistance();
+
+  // CRITICAL SAFETY CHECK
+  if (distance < 15 && activeCmd == 'F') { 
+    stopMotors();
+    ledShowStop();
+    activeCmd = 'S'; // Force stop state
+    Serial.println("OBSTACLE DETECTED - EMERGENCY BRAKE");
+  }
+
 
 //update current command
   String cmd = checkBLE();
